@@ -29,6 +29,10 @@ const config = {
       },
     ],
     "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "react/self-closing-comp": ["error", {
+      "component": true,
+      "html": true
+    }]
   },
 };
 
