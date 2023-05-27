@@ -1,14 +1,16 @@
 import { type FC, type PropsWithChildren } from "react";
-import Footer from "~/app/components/Footer";
-import Header from "~/app/components/Header";
-import RootProvider from "./components/RootProvider";
+import Footer from "~/components/Footer";
+import Header from "~/components/Header";
+import Overlay from "../components/Overlay";
+import RootProvider from "../components/RootProvider";
 import "./globals.css";
 
 const RootLayout: FC<PropsWithChildren> = ({ children }) => {
     return (
         <html lang="en">
-            <body className="min-h-screen flex flex-col">
+            <body className="relative flex min-h-screen flex-col">
                 <RootProvider>
+                    <Overlay />
                     <Header />
                     {children}
                     <Footer />

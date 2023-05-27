@@ -1,16 +1,21 @@
 "use client";
 import "client-only";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { debounce } from "ts-debounce";
 import { DEFAULT_BREAKPOINTS } from "~/utils/breakpoints";
 
 type WindowDimensions = {
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
 };
 
-function getCurrentBreakpoint(width: number) {
+function getCurrentBreakpoint(width?: number) {
     let currBreakpoint = 0;
+
+    if (!width) {
+        return -1;
+    }
+
     Object.values(DEFAULT_BREAKPOINTS).forEach((value) => {
         if (width >= value) {
             currBreakpoint = value;
@@ -22,22 +27,30 @@ function getCurrentBreakpoint(width: number) {
 
 function getWindowDimensions() {
     const { innerWidth: width, innerHeight: height } = window;
+
     return {
         width,
         height,
     };
 }
 
+/**
+ *  Looks like handling those will be really hard for SSR components
+ *  Because of that, those I'd use in client-only components, e.g admin panel
+ *  Other stuff will just use CSS media queries
+ */
 export const useWindowDimensions = (): WindowDimensions => {
-    const [dimensions, setDimensions] = useState<WindowDimensions>(
-        getWindowDimensions()
-    );
-
-    function handleWindowResize() {
-        setDimensions(getWindowDimensions());
-    }
+    const [dimensions, setDimensions] = useState<WindowDimensions>({
+        width: undefined,
+        height: undefined,
+    });
 
     const handleResize = debounce(() => {
+        // vvv Have to declare this function inside the hook to avoid problems with SSR (window is undefined on the server)
+        function handleWindowResize() {
+            setDimensions(getWindowDimensions());
+        }
+
         window.addEventListener("resize", handleWindowResize);
 
         return () => window.removeEventListener("resize", handleWindowResize);
@@ -45,6 +58,10 @@ export const useWindowDimensions = (): WindowDimensions => {
 
     useLayoutEffect(() => {
         void handleResize();
+    }, [handleResize]);
+
+    useEffect(() => {
+        setDimensions(getWindowDimensions());
     }, []);
 
     return dimensions;
